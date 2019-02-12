@@ -10,7 +10,7 @@ with io.open(path.join(here, '..', 'README.md'), mode='rt', encoding='utf-8') as
 
 setuptools.setup(
     name='hepqpr-qallse',
-    version='0.0.1',
+    version='0.1.0',
     author='Lucy Linder',
     author_email='lucy.derlin@gmail.com',
     description='High Energy Physics, Quantum Pattern Recognition using QUBO/D-Wave',
@@ -31,7 +31,7 @@ setuptools.setup(
             'filter_doublets = hepqpr.qallse.other.filter_input_doublets:cli'
         ]
     },
-    classifiers=(
+    classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Science/Research',
         'Topic :: Scientific/Engineering :: Information Analysis',
@@ -39,13 +39,13 @@ setuptools.setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Operating System :: OS Independent'
-    ),
+    ],
     install_requires=[
         'numpy>=1.14.0,<1.16.0',
         'pandas>=0.23,<0.24',
         'trackml',
-        'dwave-qbsolv==0.2.9',
-        'dwave-neal==0.4.4',
+        'dwave-qbsolv==0.2.10',
+        'dwave-neal==0.4.5',
         'click==7.0',
         'jsonschema<3.0.0',
         'plotly>=3.4,<3.5'
