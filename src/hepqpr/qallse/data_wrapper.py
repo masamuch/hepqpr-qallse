@@ -7,6 +7,7 @@ from trackml.score import score_event
 from .type_alias import TQubo, TDimodSample, TXplet, XpletType, TDoublet
 from .utils import truth_to_xplets, track_to_xplets, diff_rows
 
+from hepqpr.qallse.seeding.utils import calc_theta, calc_phi
 
 class DataWrapper:
     """
@@ -31,6 +32,10 @@ class DataWrapper:
 
         # add radius information
         hits['r'] = np.linalg.norm(hits[['x', 'y']].values.T, axis=0)
+
+        # add theta/phi information
+        hits['t'] = calc_theta(hits[['r']], hits[['z']]) # theta
+        hits['p'] = calc_phi(hits[['x']], hits[['y']])
 
         # keep a lookup of real doublets: '{hit_id_1}_{hit_id_2}' -> [hit_id_1, hit_id_2]
         df = hits.join(truth, lsuffix='_')

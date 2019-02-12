@@ -204,7 +204,7 @@ def cli_quickstart(ctx):
 @cli.command('plot')
 @click.option('-r', '--response', metavar='filepath', required=True,
               help='Path to the response file.')
-@click.option('-d', '--dims', default='xy', type=click.Choice(['xy', 'zr', 'zxy']),
+@click.option('-d', '--dims', default='xy', type=click.Choice(['xy', 'zr', 'zxy', 'tp']),
               help='Dimensions of the plot.')
 @click.option('-m', '--mode', default='d', type=click.Choice(['d', 't', 'dt']),
               help='Plot the doublets only (d), the triplets only (t), or both (dt).')

@@ -44,12 +44,15 @@ import random
 import re
 from datetime import datetime
 
+from hepqpr.qallse.seeding.utils import calc_r, calc_theta, calc_eta
+
 import click
 import numpy as np
 import pandas as pd
 
 BARREL_VOLUME_IDS = [8, 13, 17]
 
+import time
 import logging
 
 logger = logging.getLogger(__name__)
@@ -68,7 +71,7 @@ def create_dataset(
         high_pt_cut=1.,
         double_hits_ok=False,
         gen_doublets=False,
-        prefix=None, random_seed=None, phi_bounds=None):
+        prefix=None, random_seed=None, phi_bounds=None, eta_bounds=None):
     input_path = input_path.replace('-hits.csv', '')  # just in case
 
     # capture all parameters, so we can dump them to a file later
@@ -118,6 +121,13 @@ def create_dataset(
         df['phi'] = np.arctan2(df.y, df.x)
         df = df[(df.phi >= phi_bounds[0]) & (df.phi <= phi_bounds[1])]
         logger.debug(f'Filtered using phi bounds {phi_bounds}. Remaining hits: {len(df)}.')
+
+    if eta_bounds is not None:
+        r = calc_r(df.x, df.y)
+        theta = calc_theta(r, df.z)
+        df['eta'] = calc_eta(theta)
+        df = df[(df.eta >= eta_bounds[0]) & (df.eta <= eta_bounds[1])]
+        logger.debug(f'Filtered using eta bounds {eta_bounds}. Remaining hits: {len(df)}.')
 
     # store the noise for later, then remove them from the main dataframe
     # do this before filtering double hits, as noise will be thrown away as duplicates
@@ -195,7 +205,11 @@ def create_dataset(
     if gen_doublets:
 
         from hepqpr.qallse.seeding import generate_doublets
+        start_time = time.process_time()
         doublets_df = generate_doublets(hits=new_hits)
+        exec_time = time.process_time() - start_time
+        logger.info(f'Doublets generated in {exec_time:.2f}s.')
+
         with open(output_path + '-doublets.csv', 'w') as f:
             doublets_df.to_csv(f, index=False)
             logger.info(f'Doublets (len={len(doublets_df)}) generated in f{output_path}.')
@@ -252,7 +266,8 @@ def cli(density, hpt, double_hits, min_hits, prefix, seed,
         input_path, output_path,
         density, min_hits,
         hpt, double_hits,
-        not no_doublets, prefix, seed)
+        #not no_doublets, prefix, seed, None, [-0.05, +0.05])
+        not no_doublets, prefix, seed, None)
 
     seed, density = meta['random_seed'], meta['num_tracks']
     print(f'Dataset written in {path}* (seed={seed}, num. tracks={density})')
