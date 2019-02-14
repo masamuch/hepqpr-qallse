@@ -22,9 +22,9 @@ class DoubletConfig(MpConfig):
     do_d0z0cut_forDblt = True
 
     #: maximum curvature calculated from minimum pT and magnetic strength
-    magnetic_strength = 4 # 2 Tesla ?
-    min_transverse_momentum = 1.0 # 0.15 # [GeV]
-    tplet_max_curv = 1 / (0.3 * magnetic_strength * min_transverse_momentum * 1E+3) # [1/mm]
+    magnetic_strength = 2 # 2 Tesla 
+    min_transverse_momentum = 0.75 # 0.12 # [GeV]
+    tplet_max_curv = (0.3 * magnetic_strength) /  min_transverse_momentum * 1E+3) # [1/mm]
     
     #: cost for one doublet
     qubo_bias_weight = 1.

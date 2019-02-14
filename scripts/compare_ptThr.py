@@ -1,14 +1,10 @@
 import pickle
 
 results = {}
-modelList = ["Mp","D0","Doublet"]
-#modelList = ["D0","Doublet"]
-
-#depVar = "Density"
-depVar = "ptThr"
+modelList = ["D0"]
 
 try:
-    picklename = ".tmp.testPlot.pickle"
+    picklename = ".tmp.checkpT_curv.pickle"
     with open(picklename,'rb') as f:
         results = pickle.load(f)
 except:
@@ -20,7 +16,8 @@ import numpy as np
 
 variableList = [
     "Density",
-    "ptThr",
+    "ptThr_r",
+    "ptThr_w",
     "Nhits",
     "Ntracks",
     "Ndoublets",
@@ -42,8 +39,6 @@ variableList = [
 ]
 variables = {}
 for k, v in sorted(results.items(), key=lambda x: x[1]["density"]):
-    if depVar == "Density" and k[2] != 5.0e-03: continue
-    if depVar == "ptThr" and k[1] != 0.2: continue
     m = k[0]
     #i = k[3]
     if m not in variables:
@@ -51,7 +46,8 @@ for k, v in sorted(results.items(), key=lambda x: x[1]["density"]):
         for v1 in variableList:
             variables[m][v1] = []
     
-    variables[m]["ptThr"]                   .append(0.6/(v["ptThr"]*1e+3))
+    variables[m]["ptThr_r"]                 .append(0.6/(v["ptThr_r"]*1e+3))
+    variables[m]["ptThr_w"]                 .append(v["ptThr_w"])
     variables[m]["Density"]                 .append(v["density"]*100)
     variables[m]["Nhits"]                   .append(v["meta"]["num_hits"])
     variables[m]["Ntracks"]                 .append(v["meta"]["num_tracks"])
@@ -73,40 +69,14 @@ for k, v in sorted(results.items(), key=lambda x: x[1]["density"]):
     variables[m]["missing_initDoublet"]     .append(v["missing_initDoublet"])
 
 
-plotVar = {
-    ("Ndoublets", "TModelBuilding"),
-    ("Density"  , "TModelBuilding"),
-    ("Density"  , "TReadingHits"),
-    ("Density"  , "TInitialDoubletBuilding"),
-    ("Density"  , "TNeal"),
-    ("QuboSize" , "TNeal"),
-    ("Density"  , "QuboSize"),
-    ("Density"  , "Precision"),
-    ("Density"  , "Recall"),
-    ("Density"  , "Missing"),
-    ("Density"  , "diffEnergy"),
-    ("Density"  , "Nhits"),
-    ("Density"  , "Ntracks"),
-    ("Density"  , "Ndoublets"),
-    ("Density"  , "TrackmlScore"),
-    ("Density"  , "TQuboBuilding"),
-    ("QuboSize" , "TQuboBuilding"),
-    ("Density"  , "precision_initDoublet"),
-    ("Density"  , "recall_initDoublet"),
-    ("Density"  , "missing_initDoublet"),
-    ("ptThr"    , "TModelBuilding"),
-    ("ptThr"    , "TInitialDoubletBuilding"),
-    ("ptThr"    , "TNeal"),
-    ("ptThr"    , "QuboSize"),
-    ("ptThr"    , "Precision"),
-    ("ptThr"    , "Recall"),
-    ("ptThr"    , "Missing"),
-    ("ptThr"    , "diffEnergy"),
-    ("ptThr"    , "Ndoublets"),
-    ("ptThr"    , "TrackmlScore")
-}
+plotVar = [
+    ("ptThr_w"  , "ptThr_r", "TrackmlScore"),
+    ("ptThr_w"  , "ptThr_r", "Recall")
+]
 
 legendStr = {
+    "ptThr_w"       :r"p_{T} threshold for trackML score",
+    "ptThr_r"       :r"p_{T} threshold for track reconstruction",
     "Density"       :r"Density [%]",
     "ptThr"         :r"pT threshold [GeV]",
     "Nhits"         :r"N of hits",
@@ -136,44 +106,17 @@ cmap = {
     "Doublet":cmap0(2)
 }
 for v in plotVar:
-    if depVar == "Density" and v[0] == "ptThr": continue
-    if depVar == "ptThr" and v[0] == "Density": continue
     for m in modelList:
         x = variables[m][v[0]]
         y = variables[m][v[1]]
-        plt.plot(x, y, 'ro', color=cmap[m], label=m)
-        if (
-            v == ("Density"  , "Ndoublets")
-         or v == ("Density"  , "TInitialDoubletBuilding")
-            ):
-            p = np.polyfit(x, y, 2)
-            plt.plot(x, np.poly1d(p)(x), color=cmap[m], label=f'{m}, poly2 fit')
-        if (
-            v == ("Density"  , "TModelBuilding")
-            ):
-            p = np.polyfit(x, y, 3)
-            plt.plot(x, np.poly1d(p)(x), color=cmap[m], label=f'{m}, poly3 fit')
-        if (
-            v == ("Density"  , "QuboSize")
-            ):
-            p = np.polyfit(x, y, 6)
-            plt.plot(x, np.poly1d(p)(x), color=cmap[m], label=f'{m}, poly6 fit')
-        if (
-            v == ("QuboSize" , "TNeal")
-            ):
-            p = np.polyfit(x, y, 1)
-            plt.plot(x, np.poly1d(p)(x), color=cmap[m], label=f'{m}, poly1 fit')
-        #if (
-        #    v == ("Density"  , "diffEnergy")
-        #    ):
-        #    p = np.polyfit(x, y, 2)
-        #    plt.plot(x, np.poly1d(p)(x), label=f'{m}, poly2 fit')
-        #plt.plot(variables[v[0]], np.poly1d(np.polyfit(variables[v[0]], variables[v[1]], 3))(variables[v[0]]), label='poly3')
-        #plt.plot(variables[v[0]], np.poly1d(np.polyfit(variables[v[0]], variables[v[1]], 4))(variables[v[0]]), label='poly4')
+        z = variables[m][v[2]]
+        #plt.plot(x, y, 'ro', color=cmap[m], label=m)
+        plt.scatter(x, y, c=z)
+        #plt.contour(x, y, z)
     plt.xlabel(legendStr[v[0]])
     plt.ylabel(legendStr[v[1]])
     plt.title(f'{legendStr[v[0]]} vs {legendStr[v[1]]}')
-    plt.legend()
-    plt.savefig("figure/fig_"+v[0]+"_"+v[1]+".png")
+    #plt.legend()
+    plt.savefig("figure_ptThr/fig_"+v[0]+"_"+v[1]+"_"+v[2]+".png")
     plt.close()
     #plt.show()

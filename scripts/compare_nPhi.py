@@ -1,14 +1,11 @@
 import pickle
 
 results = {}
-modelList = ["Mp","D0","Doublet"]
+modelList = ["D0"]
 #modelList = ["D0","Doublet"]
 
-#depVar = "Density"
-depVar = "ptThr"
-
 try:
-    picklename = ".tmp.testPlot.pickle"
+    picklename = ".tmp.seedingLoss.pickle"
     with open(picklename,'rb') as f:
         results = pickle.load(f)
 except:
@@ -21,6 +18,7 @@ import numpy as np
 variableList = [
     "Density",
     "ptThr",
+    "nPhi",
     "Nhits",
     "Ntracks",
     "Ndoublets",
@@ -42,8 +40,6 @@ variableList = [
 ]
 variables = {}
 for k, v in sorted(results.items(), key=lambda x: x[1]["density"]):
-    if depVar == "Density" and k[2] != 5.0e-03: continue
-    if depVar == "ptThr" and k[1] != 0.2: continue
     m = k[0]
     #i = k[3]
     if m not in variables:
@@ -51,8 +47,9 @@ for k, v in sorted(results.items(), key=lambda x: x[1]["density"]):
         for v1 in variableList:
             variables[m][v1] = []
     
-    variables[m]["ptThr"]                   .append(0.6/(v["ptThr"]*1e+3))
+    variables[m]["ptThr"]                   .append(1./(v["ptThr"]*1.2e+3))
     variables[m]["Density"]                 .append(v["density"]*100)
+    variables[m]["nPhi"]                    .append(k[3])
     variables[m]["Nhits"]                   .append(v["meta"]["num_hits"])
     variables[m]["Ntracks"]                 .append(v["meta"]["num_tracks"])
     variables[m]["Ndoublets"]               .append(v["Ndoublets"])
@@ -74,40 +71,28 @@ for k, v in sorted(results.items(), key=lambda x: x[1]["density"]):
 
 
 plotVar = {
-    ("Ndoublets", "TModelBuilding"),
-    ("Density"  , "TModelBuilding"),
-    ("Density"  , "TReadingHits"),
-    ("Density"  , "TInitialDoubletBuilding"),
-    ("Density"  , "TNeal"),
-    ("QuboSize" , "TNeal"),
-    ("Density"  , "QuboSize"),
-    ("Density"  , "Precision"),
-    ("Density"  , "Recall"),
-    ("Density"  , "Missing"),
-    ("Density"  , "diffEnergy"),
-    ("Density"  , "Nhits"),
-    ("Density"  , "Ntracks"),
-    ("Density"  , "Ndoublets"),
-    ("Density"  , "TrackmlScore"),
-    ("Density"  , "TQuboBuilding"),
-    ("QuboSize" , "TQuboBuilding"),
-    ("Density"  , "precision_initDoublet"),
-    ("Density"  , "recall_initDoublet"),
-    ("Density"  , "missing_initDoublet"),
-    ("ptThr"    , "TModelBuilding"),
-    ("ptThr"    , "TInitialDoubletBuilding"),
-    ("ptThr"    , "TNeal"),
-    ("ptThr"    , "QuboSize"),
-    ("ptThr"    , "Precision"),
-    ("ptThr"    , "Recall"),
-    ("ptThr"    , "Missing"),
-    ("ptThr"    , "diffEnergy"),
-    ("ptThr"    , "Ndoublets"),
-    ("ptThr"    , "TrackmlScore")
+    ("nPhi"  , "TModelBuilding"),
+    ("nPhi"  , "TReadingHits"),
+    ("nPhi"  , "TInitialDoubletBuilding"),
+    ("nPhi"  , "TNeal"),
+    ("nPhi"  , "QuboSize"),
+    ("nPhi"  , "Precision"),
+    ("nPhi"  , "Recall"),
+    ("nPhi"  , "Missing"),
+    ("nPhi"  , "diffEnergy"),
+    ("nPhi"  , "Nhits"),
+    ("nPhi"  , "Ntracks"),
+    ("nPhi"  , "Ndoublets"),
+    ("nPhi"  , "TrackmlScore"),
+    ("nPhi"  , "TQuboBuilding"),
+    ("nPhi"  , "precision_initDoublet"),
+    ("nPhi"  , "recall_initDoublet"),
+    ("nPhi"  , "missing_initDoublet"),
 }
 
 legendStr = {
     "Density"       :r"Density [%]",
+    "nPhi"          :r"N of #phi slices",
     "ptThr"         :r"pT threshold [GeV]",
     "Nhits"         :r"N of hits",
     "Ntracks"       :r"N of tracks",
@@ -136,8 +121,6 @@ cmap = {
     "Doublet":cmap0(2)
 }
 for v in plotVar:
-    if depVar == "Density" and v[0] == "ptThr": continue
-    if depVar == "ptThr" and v[0] == "Density": continue
     for m in modelList:
         x = variables[m][v[0]]
         y = variables[m][v[1]]
@@ -174,6 +157,6 @@ for v in plotVar:
     plt.ylabel(legendStr[v[1]])
     plt.title(f'{legendStr[v[0]]} vs {legendStr[v[1]]}')
     plt.legend()
-    plt.savefig("figure/fig_"+v[0]+"_"+v[1]+".png")
+    plt.savefig("figure_nPhi/fig_"+v[0]+"_"+v[1]+".png")
     plt.close()
     #plt.show()
